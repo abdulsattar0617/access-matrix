@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose= require('mongoose');
 
 const UserModel = require("../Models/user");
 
@@ -31,21 +32,26 @@ router
         .json({ message: "Failed! Please send the user data" });
     }
 
-    console.log(user);
+    console.log(typeof user.isActive);
+    console.log(user.isActive);
     // if (isUserExist(id)) {
     //   return res
     //     .status(404)
     //     .json({ message: "Failed! No user found for the ID " + id });
     // }
 
-    user.isActive = user.isActive?.toLowerCase?.() === "true";
+    const status = user.isActive?.toLowerCase?.() === "true";
     
-
-    let updatedUser = await UserModel.findByIdAndUpdate(id, user, {
+    
+    let updatedUser = await UserModel.findByIdAndUpdate(id, {...user, ["isActive"] : status}, {
       new: true,
     });
-
-    // console.log(updatedUser);
+    
+    // updatedUser = await UserModel.findByIdAndUpdate(id, {$set: {"isActive": status}}, {
+    //   new: true,
+    // });
+    
+     console.log(updatedUser);
 
     res.status(200).send(updatedUser);
   })
@@ -102,3 +108,5 @@ const isUserExist = async (id) => {
 };
 
 module.exports = router;
+
+ 
