@@ -48,7 +48,7 @@ git clone https://github.com/abdulsattar0617/access-matrix.git
     After that, go to the frontend directory and install its dependencies as well:
 
 ```bash
-cd ../frontend && npm install
+    cd ../frontend && npm install
 ```
 
 ### 3. Environment Configuration:
@@ -106,4 +106,5 @@ git commit -m "Add feature description"
 
 
 ## License
-    This project is licensed under the MIT License.
+
+This project is licensed under the MIT License.

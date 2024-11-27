@@ -2,11 +2,9 @@ import React, { useState, useEffect } from "react";
 import { getRoleById } from "../../sampleData";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { wait } from "@testing-library/user-event/dist/utils";
-
 
 const backendServer = axios.create({
-  baseURL: process.env.REACT_APP_SERVER_API 
+  baseURL: process.env.REACT_APP_SERVER_API,
 });
 
 function NewUserForm() {
@@ -55,68 +53,31 @@ function NewUserForm() {
     }
   };
 
-  const saveUser = async () => {
-    try {
-      const url = `${process.env.REACT_APP_SERVER_API}/api/users`;
-      const requestOptions = {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      // const response = await fetch(url, requestOptions);
-      const response = await backendServer.post('/api/users', formData);
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok.");
-      }
-
-      // console.log(response);
-
-      const data = await response.json();
-      setData(data);
-      setLoading(false);
-      console.log(data);
-    } catch (error) {
-      setError(error.message);
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const url = `${process.env.REACT_APP_SERVER_API}/api/users`;
       const requestOptions = {
         method: "POST",
-        body: JSON.stringify(formData),
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ user: formData }),
       };
-      // const response = await fetch(url, requestOptions);
-      const response = await backendServer.post('/api/users', {user: formData});
+
+      let response = await fetch(
+        `${process.env.REACT_APP_SERVER_API}/api/users/`,
+        requestOptions
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok.");
       }
 
-      // console.log(response);
-
-      const data = await response.json();
-      setData(data);
-      setLoading(false);
-      console.log(data);
+      navigate("/users");
     } catch (error) {
       setError(error.message);
-      setLoading(false);
     }
-
-
-    
-    navigate("/users");
   };
 
   const handleInput = (e) => {

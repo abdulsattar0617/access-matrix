@@ -43,9 +43,33 @@ function UserDetails() {
     navigate(`/users/${userID}/edit`);
   };
 
-  const handleDeleteOnClick = () => {
+  const handleDeleteOnClick = async () => {
     // todo:  Delete the user with the ID : userID
-    navigate(`/users`);
+
+
+    try {
+      const requestOptions = {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // body: JSON.stringify(data),
+      };
+
+      let response = await fetch(
+        `${process.env.REACT_APP_SERVER_API}/api/users/${userID}`,
+        requestOptions
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok.");
+      }
+
+      navigate("/users");
+    } catch (error) {
+      setError(error.message);
+    }
+
   };
 
   return (

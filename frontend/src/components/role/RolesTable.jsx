@@ -1,31 +1,32 @@
 import React from "react";
-import { users } from "../../sampleData";
-import CircleIcon from "@mui/icons-material/Circle";
-import { red } from "@mui/material/colors";
 import EditNoteSharpIcon from "@mui/icons-material/EditNoteSharp";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import { Link } from "react-router-dom";
 
-function createRow(id, name, status, action) {
+function createRow(id, role, readPer, writePer, actions) {
   return (
     <tr>
       <td className="col-2" scope="col">
         {id.slice(-4)}
       </td>
       <td className="col-6" scope="col">
-        <Link to={`/users/${id}`} >{name}</Link>
+        {/* <a href={}></a> */}
+        <Link to={`/roles/${id}`}>{role}</Link>
       </td>
       <td className="col-2" scope="col">
-        {status}
+        {readPer}
       </td>
       <td className="col-2" scope="col">
-        {action}
+        {writePer}
+      </td>
+      <td className="col-2" scope="col">
+        {actions}
       </td>
     </tr>
   );
 }
 
-function UsersTable({ data }) {
+function RolesTable({ data }) {
   return (
     <div className="table-responsive">
       <table className="table table-hover ">
@@ -35,10 +36,13 @@ function UsersTable({ data }) {
               ####
             </th>
             <th className="col-6" scope="col">
-              Name
+              Role Title
             </th>
             <th className="col-2" scope="col">
-              Status
+              Read
+            </th>
+            <th className="col-2" scope="col">
+              Write
             </th>
             <th className="col-2" scope="col">
               Actions
@@ -47,33 +51,48 @@ function UsersTable({ data }) {
         </thead>
         <tbody>
           {data &&
-            data.map((user) => {
+            data.map((role) => {
               // id - first four digits
-              const id = user._id;
+              const id = role._id;
               // name
-              const name = user.name;
-              // active / inactive status with icon
-              let status = null;
-              // console.log(user);
-              {
-                user.isActive
-                  ? (status = <CircleIcon color="success" />)
-                  : (status = <CircleIcon sx={{ color: red[500] }} />);
-              }
+              const title = role.title;
+
+              // read checkbox
+              const readPermission = (
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  checked={role.permissions.read}
+                  readOnly
+                />
+              );
+
+              // write checkbox
+              const writePermission = (
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  checked={role.permissions.write}
+                  readOnly
+                />
+              );
 
               // actions to delete & edit (icons)
               const editIcon = (
-                <Link to={`/users/${user._id}/edit`}>
+                <Link to={`/roles/${role._id}/edit`}>
                   <EditNoteSharpIcon />
                 </Link>
               );
               const deleteIcon = (
-                <Link to={"/users"}>
+                <Link to={"/roles"}>
                   <DeleteRoundedIcon />
                 </Link>
               );
 
-              return createRow(id, name, status, [editIcon, deleteIcon]);
+              return createRow(id, title, readPermission, writePermission, [
+                editIcon,
+                deleteIcon,
+              ]);
             })}
         </tbody>
       </table>
@@ -81,4 +100,4 @@ function UsersTable({ data }) {
   );
 }
 
-export default UsersTable;
+export default RolesTable;

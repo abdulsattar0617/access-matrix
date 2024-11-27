@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { getRoleById } from "../../sampleData";
 import { useNavigate, useParams } from "react-router-dom";
-import { getRoleById, getUserById, users } from "../../sampleData";
 import axios from "axios";
 
 const backendServer = axios.create({
@@ -8,52 +8,74 @@ const backendServer = axios.create({
 });
 
 function EditUserForm() {
-  // const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { id: userID } = useParams();
+  const sampleUser = {
+    _id: "67471fb1bce42f10c544c174",
+    name: "Wanderlust",
+    email: "abdulsattar0617@gmail.com",
+    username: "softtech",
+    password: "1234",
+    roleId: "674493a041ca594eb8949509",
+    isActive: false,
+  };
+
+  // handle the input in states
+  const [formData, setFormData] = useState({});
+
+  const [roleTitle, setRoleTitle] = useState(formData.roleId);
+  const [sameAsEmail, setSameAsEmail] = useState(false);
+  const navigate = useNavigate();
+
   const [roles, setRoles] = useState([]);
 
-  const { id: userID } = useParams();
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState([]);
-
-  const [roleTitle, setRoleTitle] = useState("");
-  const [sameAsEmail, setSameAsEmail] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchUser();
     fetchRoles();
+    fetchUserData();
   }, []);
 
-  const fetchUser = async () => {
+  const fetchRoles = async () => {
     try {
-      const response = await backendServer.get(`/api/users/${userID}`);
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_API}/api/roles/`
+      );
 
-      if (response.status != 200) {
+      // console.log(response);
+      if (!response.ok) {
         throw new Error("Network response was not ok.");
       }
 
-      const data = response.data;
-      setFormData(data);
+      const data = await response.json();
+      setRoles(data);
       setLoading(false);
-      console.log(data);
+      // console.log(data);
     } catch (error) {
       setError(error.message);
       setLoading(false);
     }
   };
 
-  const fetchRoles = async () => {
+  const fetchUserData = async () => {
     try {
-      let response = await backendServer.get("/api/roles/");
-      if (response.status != 200) {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_API}/api/users/${userID}`
+      );
+
+      if (!response.ok) {
         throw new Error("Network response was not ok.");
       }
 
-      const data = response.data;
-      setRoles(data);
+      // console.log(response);
+
+      const data = await response.json();
+      setFormData(data);
+
+      setRoleTitle(data.roleId.title);
+
       setLoading(false);
-      console.log(data);
+      // console.log(data);
     } catch (error) {
       setError(error.message);
       setLoading(false);
@@ -63,30 +85,30 @@ function EditUserForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
-
-    // make PATCH request to server
-    // at /users/:id
-    // to update the user
-
+    // console.log(formData);
+    delete formData._id;
+    delete formData.__v;
     try {
-      let response = await backendServer.patch(`/api/users/${userID}`, {
-        user: formData,
-      });
+      const requestOptions = {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user: formData }),
+      };
 
-      console.log(response);
+      let response = await fetch(
+        `${process.env.REACT_APP_SERVER_API}/api/users/${userID}`,
+        requestOptions
+      );
 
-      if (response.status !== 200) {
+      if (!response.ok) {
         throw new Error("Network response was not ok.");
       }
 
-      const updatedUser = response.data;
-      setFormData(updatedUser);
-      setLoading(false);
-      navigate(`/users/${userID}`);
+      navigate("/users");
     } catch (error) {
       setError(error.message);
-      setLoading(false);
     }
   };
 
@@ -110,7 +132,7 @@ function EditUserForm() {
   const handleSelectInput = (e) => {
     let { name, value } = e.target;
 
-    let role = roles.some((role) => role._id === value);
+    let role = getRoleById(value);
 
     if (role) {
       setFormData({ ...formData, [name]: value });
@@ -135,7 +157,7 @@ function EditUserForm() {
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
-        <p>Error : {error}</p>
+        <p>Error: {error}</p>
       ) : (
         <div className="container  row">
           <div className="col-2"></div>
@@ -176,6 +198,27 @@ function EditUserForm() {
                 </div>
               </div>
 
+              <div className="row mb-3">
+                <div className="col-sm-9 offset-sm-3">
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="user-same-check"
+                      checked={sameAsEmail}
+                      onChange={handleCheckSameAsEmail}
+                      readOnly
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="user-same-check"
+                    >
+                      Same as Email
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               {/* username */}
               <div className="row mb-3">
                 <label
@@ -192,8 +235,6 @@ function EditUserForm() {
                     name="username"
                     value={formData.username}
                     onChange={handleInput}
-                    readOnly
-                    disabled
                   />
                 </div>
               </div>
@@ -231,7 +272,9 @@ function EditUserForm() {
                     value={roleTitle}
                     onChange={handleSelectInput}
                   >
-                    <option>{formData.roleId.title}</option>
+                    <option defaultValue="" value={null}>
+                      {roleTitle}
+                    </option>
                     {roles &&
                       roles.map((role) => {
                         return (

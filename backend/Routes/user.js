@@ -31,13 +31,15 @@ router
         .json({ message: "Failed! Please send the user data" });
     }
 
-    if (isUserExist(id)) {
-      return res
-        .status(404)
-        .json({ message: "Failed! No user found for the ID " + id });
-    }
+    console.log(user);
+    // if (isUserExist(id)) {
+    //   return res
+    //     .status(404)
+    //     .json({ message: "Failed! No user found for the ID " + id });
+    // }
 
     user.isActive = user.isActive?.toLowerCase?.() === "true";
+    
 
     let updatedUser = await UserModel.findByIdAndUpdate(id, user, {
       new: true,
@@ -52,7 +54,7 @@ router
   .get(async (req, res) => {
     let { id } = req.params;
 
-    let user = await UserModel.findById(id).populate('roleId').exec();
+    let user = await UserModel.findById(id).populate("roleId").exec();
 
     if (!user) {
       return res
@@ -76,7 +78,7 @@ router
   .post(async (req, res) => {
     let { user } = req.body;
 
-    // console.log(user); 
+    // console.log(user);
 
     user.isActive = user.isActive?.toLowerCase?.() === "true";
     let newUser = new UserModel(user);
@@ -99,5 +101,4 @@ const isUserExist = async (id) => {
   }
 };
 
-
-module.exports = router; 
+module.exports = router;
